@@ -9,13 +9,6 @@ XRay Log PHP SDK for logging and monitoring applications. This SDK provides a si
 <a href="https://packagist.org/packages/xray-log/php-sdk"><img src="https://img.shields.io/packagist/l/xray-log/php-sdk" alt="License"></a>
 </p>
 
-## Requirements
-
-- PHP >= 7.1
-- PHP curl extension
-- PHP json extension
-- symfony/var-dumper ^5.4
-
 ## Installation
 
 You can install the package via composer:

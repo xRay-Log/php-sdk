@@ -1,0 +1,44 @@
+{
+    "name": "xray-log/php-sdk",
+    "description": "XRay Log PHP SDK for logging and monitoring",
+    "type": "library",
+    "require": {
+        "php": ">=7.2.5",
+        "ext-json": "*",
+        "ext-curl": "*",
+        "symfony/var-dumper": "^5.4"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^8.0",
+        "guzzlehttp/guzzle": "^7.0",
+        "php-mock/php-mock-phpunit": "^2.0"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "XRayLog\\": "src/"
+        },
+        "files": [
+            "src/helpers.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "XRayLog\\Tests\\": "tests/"
+        },
+        "classmap": [
+            "tests/"
+        ]
+    },
+    "authors": [
+        {
+            "name": "Muhammet Us",
+            "email": "muhammetuss@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "scripts": {
+        "test": "vendor/bin/phpunit",
+        "test:coverage": "vendor/bin/phpunit --coverage-html coverage"
+    }
+}

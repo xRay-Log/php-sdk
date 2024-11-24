@@ -10,18 +10,36 @@ use Symfony\Component\VarDumper\Dumper\HtmlDumper;
 
 class XRayLogger
 {
-    public const API_URL = 'http://localhost:44827';
+    private const DOCKER_HOST = 'host.docker.internal';
+    private const LOCAL_HOST = 'localhost';
+    private const PORT = '44827';
 
     private $project;
     private $client;
     private $cloner;
     private $dumper;
+    private $apiUrl;
 
     public function __construct(string $project, ?ClientInterface $client = null)
     {
         $this->project = $project;
         $this->client = $client ?? new Client();
         $this->cloner = new VarCloner();
+        $this->apiUrl = $this->determineApiUrl();
+    }
+
+    private function determineApiUrl(): string
+    {
+        $host = self::LOCAL_HOST;
+        
+        // Check if host.docker.internal is accessible
+        $dockerSocket = @fsockopen(self::DOCKER_HOST, self::PORT, $errno, $errstr, 1);
+        if ($dockerSocket) {
+            $host = self::DOCKER_HOST;
+            fclose($dockerSocket);
+        }
+        
+        return sprintf('http://%s:%s', $host, self::PORT);
     }
 
     public function setProject(string $project): void
@@ -128,15 +146,16 @@ class XRayLogger
 
         $data = [
             'level' => strtoupper($level),
-            'payload' => base64_encode($payloadHtml),
-            'trace' => base64_encode($traceHtml),
+            'payload' => $payloadHtml,
+            'trace' => $traceHtml,
             'project' => $this->project,
             'timestamp' => time()
         ];
-
+    
         try {
-            $response = $this->client->request('POST', self::API_URL . '/receive', [
-                'json' => $data
+            $response = $this->client->request('POST', $this->apiUrl . '/receive', [
+                'body' => json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+                'headers' => ['Content-Type' => 'application/json']
             ]);
 
             if ($response->getStatusCode() !== 200) {

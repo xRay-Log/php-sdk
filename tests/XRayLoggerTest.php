@@ -29,13 +29,26 @@ class XRayLoggerTest extends TestCase
         $this->assertNotNull($request);
         
         $this->assertEquals('POST', $request->getMethod());
-        $this->assertEquals(XRayLogger::API_URL . '/receive', (string) $request->getUri());
+        // Check if request URL contains either localhost or host.docker.internal
+        $requestUri = (string) $request->getUri();
+        $this->assertTrue(
+            str_contains($requestUri, 'localhost:44827/receive') || 
+            str_contains($requestUri, 'host.docker.internal:44827/receive'),
+            'Request URI should contain either localhost or host.docker.internal'
+        );
 
         $requestBody = json_decode($request->getBody()->getContents(), true);
         $this->assertArrayHasKey('project', $requestBody);
         $this->assertEquals('test-project', $requestBody['project']);
         $this->assertArrayHasKey('level', $requestBody);
         $this->assertEquals('INFO', $requestBody['level']);
+        
+        // Check Content-Type header
+        $this->assertEquals(
+            'application/json',
+            $request->getHeaderLine('Content-Type'),
+            'Content-Type header should be application/json'
+        );
     }
 
     public function testInfoLogging()

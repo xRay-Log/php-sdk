@@ -105,6 +105,7 @@ class XRayLogger
     {
         $this->dumper = new HtmlDumper();
         ob_start();
+        $this->dumper->setDumpHeader("");
         $this->dumper->dump($this->cloner->cloneVar($var));
         $html = ob_get_clean();
         $this->dumper = null;
@@ -125,8 +126,12 @@ class XRayLogger
             $payload = $level;
             $level = 'info';
         }
-
-        $payloadHtml = $this->convertToHtml($payload);
+        
+        if((is_object($payload) || is_resource($payload))) {
+            $payload = $this->convertToHtml($payload);
+        } else {
+            $payload = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        }
 
         $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
         array_shift($trace);
@@ -146,7 +151,7 @@ class XRayLogger
 
         $data = [
             'level' => strtoupper($level),
-            'payload' => $payloadHtml,
+            'payload' => $payload,
             'trace' => $traceHtml,
             'project' => $this->project,
             'timestamp' => time()
